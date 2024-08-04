@@ -1,0 +1,9 @@
+		   README for GNU development tools
+
+Pass the prefix path to make it easier:
+
+	export PREFIX="/home/candice/srv/old-happiness/Toolchain/Local"
+	cd ~/srv/old-happiness/Toolchain/Build/binutils
+    ../../Tarballs/binutils-2.43/configure --prefix="$PREFIX"
+    make all
+    make install
