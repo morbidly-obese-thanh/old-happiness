@@ -18,4 +18,34 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-/* empty stub, missing happiness bfd implementation TODO */
+// clang-format off
+#include "sysdep.h"
+#include "bfd.h"
+#include "libbfd.h"
+#include "elf-bfd.h"
+// clang-format on
+
+static reloc_howto_type *
+happiness_reloc_type_lookup(bfd *abfd, bfd_reloc_code_real_type code) {
+  return 0;
+}
+
+static reloc_howto_type *happiness_reloc_name_lookup(bfd *abfd,
+                                                     const char *name) {
+  return 0;
+}
+
+#define bfd_elf32_bfd_reloc_type_lookup happiness_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup happiness_reloc_name_lookup
+
+#define ELF_ARCH bfd_arch_happiness
+#define ELF_MAXPAGESIZE 0x4000
+#define ELF_MACHINE_CODE EM_HAPPINESS
+
+#undef TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM happiness_elf32_vec
+
+#undef TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME "elf32-happiness"
+
+#include "elf32-target.h"
