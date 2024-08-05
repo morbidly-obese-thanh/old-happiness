@@ -460,6 +460,7 @@
 #define EM_CSKY_OLD		EM_MCORE
 
 /* See the above comment before you add a new EM_* value here.  */
+#define EM_HAPPINESS 0x8523
 
 /* Values for e_version.  */
 
