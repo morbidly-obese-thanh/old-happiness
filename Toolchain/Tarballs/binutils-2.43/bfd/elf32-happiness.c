@@ -1,5 +1,5 @@
 /* OnDemand Happiness specific support for 32-bit ELF
-   Copyright (C) 2003-2024 Free Software Foundation, Inc.
+   Copyright (C) 1994-2024 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
