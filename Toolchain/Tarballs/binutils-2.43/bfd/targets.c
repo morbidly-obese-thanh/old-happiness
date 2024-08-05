@@ -19,11 +19,13 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+// clang-format off
 #include "sysdep.h"
 #include "libiberty.h"
 #include "bfd.h"
 #include "libbfd.h"
 #include "fnmatch.h"
+// clang-format on
 
 /*
    It's okay to see some:
