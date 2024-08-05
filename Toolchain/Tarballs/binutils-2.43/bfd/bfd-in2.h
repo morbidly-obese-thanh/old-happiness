@@ -1370,6 +1370,8 @@ enum bfd_architecture
 
   bfd_arch_sparc,     /* SPARC.  */
 #define bfd_mach_sparc                 1
+  bfd_arch_happiness, /* OnDemand Happiness family */
+#define bfd_mach_happiness 1
 /* The difference between v8plus and v9 is that v9 is a true 64 bit env.  */
 #define bfd_mach_sparc_sparclet        2
 #define bfd_mach_sparc_sparclite       3
