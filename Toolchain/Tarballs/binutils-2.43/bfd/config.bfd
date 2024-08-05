@@ -193,6 +193,7 @@ crx*)		 targ_archs=bfd_crx_arch ;;
 csky*)		 targ_archs=bfd_csky_arch ;;
 dlx*)		 targ_archs=bfd_dlx_arch ;;
 fido*)		 targ_archs=bfd_m68k_arch ;;
+happiness*)	 targ_archs=bfd_happiness_arch ;;
 hppa*)		 targ_archs=bfd_hppa_arch ;;
 i[3-7]86)	 targ_archs=bfd_i386_arch ;;
 ia16)		 targ_archs=bfd_i386_arch ;;
@@ -546,6 +547,11 @@ case "${targ}" in
 
   h8300*-*-linux*)
     targ_defvec=h8300_elf32_linux_vec
+    ;;
+
+  happiness-*-linux*)
+    targ_defvec=happiness_elf32_vec
+    targ_selvecs=happiness_elf32_vec
     ;;
 
 #ifdef BFD64
