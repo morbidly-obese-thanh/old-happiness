@@ -60,6 +60,7 @@ case ${cpu} in
   crx*)			cpu_type=crx endian=little ;;
   epiphany*)		cpu_type=epiphany endian=little ;;
   fido)			cpu_type=m68k ;;
+  happiness*)	cpu_type=happiness ;;
   hppa*)		cpu_type=hppa ;;
   i[3-7]86)		cpu_type=i386 arch=i386;;
   ia16)			cpu_type=i386 arch=i386;;
@@ -201,6 +202,8 @@ case ${generic_target} in
   frv-*-*)				fmt=elf ;;
 
   ft32-*-*)				fmt=elf ;;
+
+  happiness-*-*)		fmt=elf ;;
 
   hppa-*-linux*)
     case ${cpu} in
