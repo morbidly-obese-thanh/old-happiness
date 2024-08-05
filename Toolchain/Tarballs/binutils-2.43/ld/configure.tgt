@@ -337,6 +337,8 @@ h8300-*-linux*)
 			targ_emul=h8300elf_linux;
 			targ_extra_emuls="h8300helf_linux h8300self_linux h8300sxelf_linux"
 			;;
+happiness-*-*)  	targ_emul=elf32happiness
+			;;
 hppa*64*-*-linux-*)	targ_emul=hppa64linux
 			;;
 hppa*64*-hpux*)		targ_emul=elf64hppa
