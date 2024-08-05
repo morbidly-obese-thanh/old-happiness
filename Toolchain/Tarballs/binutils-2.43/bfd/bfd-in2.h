@@ -67,15 +67,21 @@ extern "C" {
    is error prone, so using this macro is safer.  */
 #define STRING_COMMA_LEN(STR) (STR), (sizeof (STR) - 1)
 
+// clang-format off
 #define BFD_SUPPORTS_PLUGINS @supports_plugins@
+// clang-format on
 
 /* The word size used by BFD on the host.  This may be 64 with a 32
    bit target if the host is 64 bit, or if other 64 bit targets have
    been selected with --enable-targets, or if --enable-64-bit-bfd.  */
+// clang-format off
 #define BFD_ARCH_SIZE @wordsize@
+// clang-format on
 
 /* The word size of the default bfd target.  */
+// clang-format off
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
+// clang-format on
 
 #include <inttypes.h>
 
@@ -132,8 +138,10 @@ typedef uint32_t symvalue;
 
 /* An offset into a file.  BFD always uses the largest possible offset
    based on the build time availability of fseek, fseeko, or fseeko64.  */
+// clang-format off
 typedef @bfd_file_ptr@ file_ptr;
 typedef @bfd_ufile_ptr@ ufile_ptr;
+// clang-format on
 
 typedef uint32_t flagword;	/* 32 bits of flags */
 typedef uint8_t bfd_byte;
