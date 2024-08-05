@@ -24,4 +24,5 @@
 #define TARGET_FORMAT "elf32-happiness"
 #define TARGET_ARCH bfd_arch_happiness
 #define TARGET_MACH bfd_mach_happiness
+#define TARGET_BYTES_BIG_ENDIAN 0
 #endif
