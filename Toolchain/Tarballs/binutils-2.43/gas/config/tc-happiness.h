@@ -26,7 +26,7 @@
 #define TARGET_MACH bfd_mach_happiness
 #define TARGET_BYTES_BIG_ENDIAN 0
 
-#define md_operand(x)
+#define md_operand(X)
 
 #define md_number_to_chars number_to_chars_littleendian
 
