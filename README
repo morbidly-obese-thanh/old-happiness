@@ -1,9 +1,10 @@
 		   README for GNU development tools
 
-Pass the prefix path to make it easier:
+Pass the prefix path, and the target to make it easier:
 
     export PREFIX="/home/candice/srv/old-happiness/Toolchain/Local"
+    export TARGET="happiness-linux"
     cd ~/srv/old-happiness/Toolchain/Build/binutils
-    ../../Tarballs/binutils-2.43/configure --prefix="$PREFIX"
+    ../../Tarballs/binutils-2.43/configure --prefix="$PREFIX" --target="$TARGET"
     make all
     make install
