@@ -32,4 +32,22 @@
 
 #define WORKING_DOT_WORD
 
+/* Define this to support indexing using subscripts, e.g. 'port32[r1].' */
+#define NEED_INDEX_OPERATOR 1
+
+/* Most of the targets instructions use '=', thus allow explicitly. */
+#define TC_EQUAL_IN_INSN(C, NAME) 1
+
+/* Avoid register expressions such as 'r10+r11' being folded into 'r21.' */
+#define md_register_arithmetic 0
+
+/* Declare that we want our own name parsing. */
+#define md_parse_name(str, expr, m, c) happiness_parse_name(str, expr, c)
+int happiness_parse_name(const char *, expressionS *, char *);
+
+/* Explicit machine expressions, remap to ones reserved for that purpose. */
+#define O_port O_md1
+#define O_jump O_md2
+#define O_jrel O_md3
+
 #endif
