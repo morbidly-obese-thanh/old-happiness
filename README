@@ -6,5 +6,5 @@ Pass the prefix path, and the target to make it easier:
     export TARGET="happiness-linux"
     cd ~/srv/old-happiness/Toolchain/Build/binutils
     ../../Tarballs/binutils-2.43/configure --prefix="$PREFIX" --target="$TARGET"
-    make all
-    make install
+    make all CFLAGS="-O0 -g"
+    make install CFLAGS="-O0 -g"
