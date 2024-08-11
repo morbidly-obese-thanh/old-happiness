@@ -194,36 +194,118 @@ void md_begin(void) {
 /* Distinguish instruction types and initiate building. */
 static bfd_boolean happiness_build_insn(happiness_slot_insn *insn,
                                         expressionS *lhs, expressionS *rhs) {
-  gas_assert(lhs != 0);
+  gas_assert(lhs != 0 && insn != 0);
 
   switch (lhs->X_op) {
   case O_register: {
     /* Instruction writes to a register, the type depends on rhs. */
     gas_assert(rhs != 0);
 
-    if (O_register == rhs->X_op || O_constant == rhs->X_op) {
-      printf("Building a 'move' instruction\n");
+    insn->dst = lhs->X_add_number;
+
+    if (O_register == rhs->X_op) {
+      insn->opcode = OP_MOV;
+      insn->admode = AM_01001;
+      insn->src0 = rhs->X_add_number;
+      return true;
+    } else if (O_constant == rhs->X_op) {
+      insn->opcode = OP_MOV;
+      insn->admode = AM_01000;
+
+      /* Indicate the use of an immediate. */
+      insn->pad = 1;
+      insn->immv = rhs->X_add_number;
       return true;
     } else if (O_add == rhs->X_op) {
-      printf("Building an 'add' instruction\n");
-      return true;
+      insn->opcode = OP_ADD;
+
+      gas_assert(rhs->X_add_symbol != 0 && rhs->X_op_symbol != 0);
+
+      expressionS *op1_expr = symbol_get_value_expression(rhs->X_add_symbol);
+      expressionS *op2_expr = symbol_get_value_expression(rhs->X_op_symbol);
+
+      if (op1_expr->X_op != O_register) {
+        as_bad("operand expected to be a register");
+        return false;
+      }
+
+      /* Populate the first instruction source operand. */
+      insn->src0 = op1_expr->X_add_number;
+
+      if (O_register == op2_expr->X_op) {
+        insn->admode = AM_01011;
+        insn->src1 = op2_expr->X_add_number;
+        return true;
+      } else if (O_constant == op2_expr->X_op) {
+        insn->admode = AM_01010;
+        insn->immv = op2_expr->X_add_number;
+        insn->pad = 1;
+        return true;
+      }
+
+      as_bad("unexpected operand type for 'add'");
     } else if (O_index == rhs->X_op) {
-      printf("Building a 'load' instruction\n");
-      return true;
+      expressionS *index_expr = symbol_get_value_expression(rhs->X_op_symbol);
+
+      /* The rhs expression consists of a 'port32' expression as 'X_add_symbol'
+       * and the index as 'X_op_symbol.' */
+      if (O_register == index_expr->X_op) {
+        insn->opcode = OP_LOAD;
+        insn->admode = AM_01001;
+        insn->src0 = index_expr->X_add_number;
+        return true;
+      }
+
+      as_bad("unexpected operand type for 'load'");
     }
 
     break;
   }
 
   case O_index: {
-    printf("Building a 'store' instruction\n");
-    return true;
+    if (O_register == rhs->X_op) {
+      insn->dst = rhs->X_add_number;
+
+      expressionS *index_expr = symbol_get_value_expression(lhs->X_op_symbol);
+
+      /* The rhs expression consists of a 'port32' expression as 'X_add_symbol'
+       * and the index as 'X_op_symbol.' */
+      if (O_register == index_expr->X_op) {
+        insn->opcode = OP_STORE;
+        insn->admode = AM_01001;
+        insn->src0 = index_expr->X_add_number;
+        return true;
+      }
+    }
+
+    as_bad("unexpected operand type for 'store'");
+    break;
   }
 
   case O_jump:
   case O_jrel: {
-    printf("Building a 'jump/jrel' instruction\n");
-    return true;
+    gas_assert(lhs->X_add_symbol != 0);
+
+    insn->opcode = O_jump == lhs->X_op ? OP_JUMP : OP_JUMP_REL;
+
+    /* The target operand went into 'X_add_symbol' during the name parsing. */
+    expressionS *target_expr = symbol_get_value_expression(lhs->X_add_symbol);
+
+    if (O_register == target_expr->X_op) {
+      insn->admode = AM_01001;
+      insn->dst = target_expr->X_add_number;
+      return true;
+    } else if (O_symbol == target_expr->X_op) {
+      insn->admode = AM_01000;
+
+      /* Have no address for the symbol yet. Thus, need to relocate absolute
+       * jumps. Relative jumps can be fixed e.g. if the symbol is local. */
+      insn->pad = 1;
+      return true;
+    }
+
+    as_bad("unexpected operand type for 'jump/jrel'");
+    break;
   }
 
   default:
@@ -231,6 +313,34 @@ static bfd_boolean happiness_build_insn(happiness_slot_insn *insn,
   }
 
   return false;
+}
+
+/* Emit instructions together with their immediates. */
+static void happiness_emit_insn(happiness_slot_insn *insn) {
+  gas_assert(insn != 0);
+
+  /* Pack into a single integer. */
+  int e_insn = 0;
+  char *frag = frag_more(HAPPINESS_BYTES_SLOT_INSTRUCTION);
+
+  /* Binary instruction layout. */
+  e_insn |= (insn->pad << 31);
+  e_insn |= ((insn->opcode & 0x7F) << 24);
+  e_insn |= ((insn->admode & 0x3F) << 18);
+  e_insn |= ((insn->src0 & 0x3F) << 12);
+  e_insn |= ((insn->src1 & 0x3F) << 6);
+  e_insn |= (insn->dst & 0x3F);
+
+  printf("Writing instruction data: %d\n", e_insn);
+
+  /* Output the instruction part. If it uses an immediate write it right after
+   * the instruction. Don't worry about relocation yet. */
+  md_number_to_chars(frag, e_insn, HAPPINESS_BYTES_SLOT_INSTRUCTION);
+
+  if (insn->pad) {
+    frag = frag_more(HAPPINESS_BYTES_SLOT_IMMEDIATE);
+    md_number_to_chars(frag, insn->immv, HAPPINESS_BYTES_SLOT_IMMEDIATE);
+  }
 }
 
 /* Main assembler hook, called once for each "instruction string." */
@@ -283,6 +393,9 @@ void md_assemble(char *insn_str) {
 
   if (!insn_done) {
     as_fatal(_("Could not build instruction"));
+  } else {
+    happiness_emit_insn(insn);
+    printf("  written instruction\n");
   }
 
   return;
@@ -297,8 +410,17 @@ symbolS *md_undefined_symbol(char *name) {
 /* Again, no floating point expressions available. */
 const char *md_atof(int type, char *lit, int *size) { return 0; }
 
-/* Can't round up sections yet. */
-valueT md_section_align(asection *seg, valueT val) { return 0; }
+/* Allowing rounding up specified section with specified size to a proper
+ * boundary. */
+valueT md_section_align(asection *seg, valueT size) {
+  /* Logarithmic style, i.e. 2 for a 4-byte alignment. NOTE, the proper
+   * alignment is not set yet, i.e. is 0 now. */
+  int align = bfd_section_alignment(seg);
+  int new_size = ((size + (1 << align) - 1) & -(1 << align));
+
+  /* Alternatively, align_power(x, y) should do the same. */
+  return new_size;
+}
 
 /* Also, generally no support for frag conversion. */
 void md_convert_frag(bfd *abfd, asection *seg, fragS *fragp) {
